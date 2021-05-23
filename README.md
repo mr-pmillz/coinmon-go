@@ -1,6 +1,6 @@
 # Coinmon-go
 
-Get Crypto Currency prices in the terminal with the quickness
+Get live Crypto Currency prices in the terminal with the quickness
 
 ## Install
 
@@ -19,10 +19,10 @@ Options:
   -f, --find       Specific Coins to return. Example: bitcoin,cardano,ethereum,uniswap
 ```
 
-- Get Top 15 Coins
+- Get Top 20 Coins
 
 ```bash
-./coinmon-go -t 15
+./coinmon-go -t 20
 ```
 
 <img src="https://github.com/mr-pmillz/coinmon-go/blob/master/img/top20.png" />
@@ -30,7 +30,9 @@ Options:
 - Get Specified Coins
 
 ```bash
-./coinmon-go -f bitcoin,ethereum,cardano,uniswap,dogecoin
+./coinmon-go --find bitcoin,ethereum,cardano,uniswap,dogecoin,chainlink,monero,filecoin,tron,bittorrent
 ```
 
 <img src="https://github.com/mr-pmillz/coinmon-go/blob/master/img/find.png" />
+
+- By default, `./coinmon-go` with no arguments will just return the top 10 coins by market cap
