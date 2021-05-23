@@ -50,8 +50,4 @@ jobs:
 
       # Run main.go
       - name: Run main
-<<<<<<< HEAD
         run: go run ./main.go
-=======
-        run: go run ./main.go
->>>>>>> 58b642068d96d6e566208b61ebe769d51ef0a1c2
