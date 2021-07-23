@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"github.com/mkideal/cli"
 	"github.com/olekukonko/tablewriter"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 )
+
+const top2000 = "https://api.coincap.io/v2/assets?limit=2000"
 
 type argT struct {
 	cli.Helper
@@ -55,14 +59,15 @@ func prettyFloatString(num string, percent, nearestThousandFMT, prec4 bool) (str
 	if err != nil {
 		return "", err
 	}
+	p := message.NewPrinter(language.English)
 	if percent {
-		return fmt.Sprintf("%.2f%%", number), nil
+		return p.Sprintf("%.2f%%", number), nil
 	} else if nearestThousandFMT {
 		return utils.NearestThousandFormat(number), nil
 	} else if prec4 {
-		return fmt.Sprintf("%.4f", number), nil
+		return p.Sprintf("%.4f", number), nil
 	}
-	return fmt.Sprintf("%.2f", number), nil
+	return p.Sprintf("%.2f", number), nil
 }
 
 func printTable(coinData *CoinData) error {
@@ -137,6 +142,25 @@ func printTable(coinData *CoinData) error {
 	return nil
 }
 
+func printTotalMarketCap(coinData *CoinData) error {
+	var total float64 = 0
+	for _, row := range coinData.Data {
+		if row.MarketCapUSD != "" {
+			number, err := strconv.ParseFloat(row.MarketCapUSD, 64)
+			if err != nil {
+				return err
+			}
+			total += number
+		}
+	}
+
+	totalString := strconv.FormatFloat(total, 'E', -1, 64)
+	totalMarketCap, _ := prettyFloatString(totalString, false, true, false)
+	totalMarketCapFull, _ := prettyFloatString(totalString, false, false, false)
+	fmt.Printf("\nTotal Crypto Market Cap \u2248 $%s \u2248 $%s \n", totalMarketCap, totalMarketCapFull)
+	return nil
+}
+
 func main() {
 	os.Exit(cli.Run(new(argT), func(ctx *cli.Context) error {
 		argv := ctx.Argv().(*argT)
@@ -155,6 +179,15 @@ func main() {
 		if err := printTable(coinData); err != nil {
 			panic(err)
 		}
+
+		totalMarketCapCoinData := new(CoinData)
+		if err := getJson(top2000, totalMarketCapCoinData); err != nil {
+			panic(err)
+		}
+		if err := printTotalMarketCap(totalMarketCapCoinData); err != nil {
+			panic(err)
+		}
+
 
 		return nil
 	}))
