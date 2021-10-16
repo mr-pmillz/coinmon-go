@@ -24,10 +24,13 @@ type argT struct {
 	Find []string `cli:"!f,find" usage:"Specific Coins to return. Example: bitcoin,cardano,ethereum,uniswap"`
 }
 
+// CoinData ...
 type CoinData struct {
 	Data      []Data `json:"data"`
 	Timestamp int64  `json:"timestamp"`
 }
+
+// Data ...
 type Data struct {
 	ID                string `json:"id"`
 	Rank              string `json:"rank"`
@@ -45,7 +48,7 @@ type Data struct {
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
-func getJson(url string, target interface{}) error {
+func getJSON(url string, target interface{}) error {
 	r, err := myClient.Get(url)
 	if err != nil {
 		return err
@@ -174,7 +177,7 @@ func main() {
 		}
 
 		coinData := new(CoinData)
-		if err := getJson(url, coinData); err != nil {
+		if err := getJSON(url, coinData); err != nil {
 			panic(err)
 		}
 		if err := printTable(coinData); err != nil {
@@ -182,7 +185,7 @@ func main() {
 		}
 
 		totalMarketCapCoinData := new(CoinData)
-		if err := getJson(top2000, totalMarketCapCoinData); err != nil {
+		if err := getJSON(top2000, totalMarketCapCoinData); err != nil {
 			panic(err)
 		}
 		if err := printTotalMarketCap(totalMarketCapCoinData); err != nil {

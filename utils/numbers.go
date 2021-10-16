@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// RoundPrec ...
 func RoundPrec(x float64, prec int) float64 {
 	if math.IsNaN(x) || math.IsInf(x, 0) {
 		return x
@@ -31,6 +32,7 @@ func RoundPrec(x float64, prec int) float64 {
 	return rounder / pow * sign
 }
 
+// NumberFormat ...
 func NumberFormat(number float64, decimals int, decPoint, thousandsSep string) string {
 	if math.IsNaN(number) || math.IsInf(number, 0) {
 		number = 0
@@ -84,6 +86,7 @@ func NumberFormat(number float64, decimals int, decPoint, thousandsSep string) s
 	return ret
 }
 
+// RoundInt ...
 func RoundInt(input float64) int {
 	var result float64
 
@@ -99,12 +102,14 @@ func RoundInt(input float64) int {
 	return int(i)
 }
 
+// FormatNumber ...
 func FormatNumber(input float64) string {
 	x := RoundInt(input)
 	xFormatted := NumberFormat(float64(x), 2, ".", ",")
 	return xFormatted
 }
 
+// NearestThousandFormat ...
 func NearestThousandFormat(num float64) string {
 
 	if math.Abs(num) < 999.5 {

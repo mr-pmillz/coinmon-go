@@ -135,5 +135,7 @@ jobs:
             bin/linux/arm64/coinmon-go-linux-arm64.gz
             bin/darwin/amd64/coinmon-go-x86_64-apple-darwin_amd64.gz
             bin/darwin/arm64/coinmon-go-x86_64-apple-darwin_arm64.gz
+            bin/windows/amd64/coinmon-go-x86_64-windows_amd64.gz
+            bin/windows/386/coinmon-go-386-windows.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
