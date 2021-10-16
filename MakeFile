@@ -1,6 +1,27 @@
+all: clean compile chmodx compress
+.PHONY: all
+
+clean:
+	rm -rf bin/linux/amd64/coinmon-go-linux-amd64.gz 2>/dev/null
+	rm -rf bin/linux/arm64/coinmon-go-linux-arm64.gz 2>/dev/null
+	rm -rf bin/darwin/amd64/coinmon-go-x86_64-apple-darwin_amd64.gz 2>/dev/null
+	rm -rf bin/darwin/arm64/coinmon-go-x86_64-apple-darwin_arm64.gz 2>/dev/null
+
 compile:
-	GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/coinmon-go main.go
-	GOOS=linux GOARCH=arm64 go build -o bin/linux/arm64/coinmon-go main.go
-	GOOS=darwin GOARCH=amd64 go build -o bin/osx/amd64/coinmon-go main.go
-	GOOS=darwin GOARCH=arm64 go build -o bin/osx/arm64/coinmon-go main.go
-	GOOS=windows GOARCH=amd64 go build -o bin/windows/x64/coinmon-go.exe main.go
+	GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/coinmon-go-linux-amd64 main.go
+	GOOS=linux GOARCH=arm64 go build -o bin/linux/arm64/coinmon-go-linux-arm64 main.go
+	GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/coinmon-go-x86_64-apple-darwin_amd64 main.go
+	GOOS=darwin GOARCH=arm64 go build -o bin/darwin/arm64/coinmon-go-x86_64-apple-darwin_arm64 main.go
+
+chmodx:
+	chmod +x bin/linux/amd64/coinmon-go-linux-amd64
+	chmod +x bin/linux/arm64/coinmon-go-linux-arm64
+	chmod +x bin/darwin/amd64/coinmon-go-x86_64-apple-darwin_amd64
+	chmod +x bin/darwin/arm64/coinmon-go-x86_64-apple-darwin_arm64
+
+compress:
+	gzip -9 bin/linux/amd64/coinmon-go-linux-amd64
+	gzip -9 bin/linux/arm64/coinmon-go-linux-arm64
+	gzip -9 bin/darwin/amd64/coinmon-go-x86_64-apple-darwin_amd64
+	gzip -9 bin/darwin/arm64/coinmon-go-x86_64-apple-darwin_arm64
+

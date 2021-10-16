@@ -4,22 +4,23 @@ import (
 	"coinmon-go/utils"
 	"encoding/json"
 	"fmt"
-	"github.com/mkideal/cli"
-	"github.com/olekukonko/tablewriter"
-	"golang.org/x/text/language"
-	"golang.org/x/text/message"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mkideal/cli"
+	"github.com/olekukonko/tablewriter"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 const top2000 = "https://api.coincap.io/v2/assets?limit=2000"
 
 type argT struct {
 	cli.Helper
-	Top string `cli:"!t,top" usage:"Amount of coins to show data for, Default is top 10, If -f|--find flag supplied, -t|--top is ignored" dft:"10"`
+	Top  string   `cli:"!t,top" usage:"Amount of coins to show data for, Default is top 10, If -f|--find flag supplied, -t|--top is ignored" dft:"10"`
 	Find []string `cli:"!f,find" usage:"Specific Coins to return. Example: bitcoin,cardano,ethereum,uniswap"`
 }
 
@@ -187,7 +188,6 @@ func main() {
 		if err := printTotalMarketCap(totalMarketCapCoinData); err != nil {
 			panic(err)
 		}
-
 
 		return nil
 	}))
