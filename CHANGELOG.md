@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.0.4](https://github.com/mr-pmillz/coinmon-go/tree/v1.0.4) (2021-10-16)
+
+[Full Changelog](https://github.com/mr-pmillz/coinmon-go/compare/v1.0.3...v1.0.4)
+
 ## [v1.0.3](https://github.com/mr-pmillz/coinmon-go/tree/v1.0.3) (2021-10-16)
 
 [Full Changelog](https://github.com/mr-pmillz/coinmon-go/compare/v1.0.2...v1.0.3)

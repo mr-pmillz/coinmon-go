@@ -1,9 +1,9 @@
 package main
 
 import (
-	"coinmon-go/utils"
 	"encoding/json"
 	"fmt"
+	"github.com/mr-pmillz/coinmon-go/utils"
 	"net/http"
 	"os"
 	"strconv"
@@ -36,10 +36,10 @@ type Data struct {
 	Rank              string `json:"rank"`
 	Symbol            string `json:"symbol"`
 	Name              string `json:"name"`
-	Supply            string `json:"supply"`
+	Supply            string `json:"supply,omitempty"`
 	MaxSupply         string `json:"maxSupply,omitempty"`
-	MarketCapUSD      string `json:"marketCapUsd"`
-	VolumeUSD24Hr     string `json:"volumeUsd24Hr"`
+	MarketCapUSD      string `json:"marketCapUsd,omitempty"`
+	VolumeUSD24Hr     string `json:"volumeUsd24Hr,omitempty"`
 	PriceUSD          string `json:"priceUsd"`
 	ChangePercent24Hr string `json:"changePercent24Hr"`
 	Vwap24Hr          string `json:"vwap24Hr"`

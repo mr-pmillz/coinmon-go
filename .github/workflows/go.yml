@@ -1,19 +1,15 @@
 # This is a basic workflow
 
-name: Go
+name: CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     tags:
       - '*'
+  pull_request:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # The "build" workflow
   build:
-    # The type of runner that the job will run on
     strategy:
       matrix:
         go-version: [1.17]
@@ -51,7 +47,10 @@ jobs:
 
       # Run build of the application
       - name: Run build
-        run: go build -v .
+        run: |
+          go env -w GOFLAGS=-mod=mod
+          go mod tidy
+          go build -v .
 
       # Run vet & lint on the code
       - name: Run vet & lint
