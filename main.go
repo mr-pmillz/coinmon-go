@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mr-pmillz/coinmon-go/utils"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -55,8 +56,8 @@ func getJSON(url string, target interface{}) error {
 	}
 	defer r.Body.Close()
 	if r.StatusCode == 429 {
-		fmt.Printf("Sleeping for 15 seconds, too many requests HTTP Response: %d\n", r.StatusCode)
-		time.Sleep(time.Second * 15)
+		fmt.Printf("[-] Sleeping for 10 seconds, too many requests HTTP Response: %d\n", r.StatusCode)
+		time.Sleep(time.Second * 10)
 		req, err := myClient.Get(url)
 		if err != nil {
 			return err
@@ -188,18 +189,21 @@ func main() {
 
 		coinData := new(CoinData)
 		if err := getJSON(url, coinData); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 		if err := printTable(coinData); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
+
+		// needed to prevent request rate limit
+		time.Sleep(time.Second * 2)
 
 		totalMarketCapCoinData := new(CoinData)
 		if err := getJSON(top2000, totalMarketCapCoinData); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 		if err := printTotalMarketCap(totalMarketCapCoinData); err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 
 		return nil

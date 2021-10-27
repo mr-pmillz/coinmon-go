@@ -36,6 +36,8 @@ If using an older version of golang
 go get github.com/mr-pmillz/coinmon-go@latest
 ```
 
+To build from source, clone the repo and run
+
 ```bash
 go build
 ```
