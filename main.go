@@ -54,6 +54,16 @@ func getJSON(url string, target interface{}) error {
 		return err
 	}
 	defer r.Body.Close()
+	if r.StatusCode == 429 {
+		fmt.Printf("Sleeping for 15 seconds, too many requests HTTP Response: %d\n", r.StatusCode)
+		time.Sleep(time.Second * 15)
+		req, err := myClient.Get(url)
+		if err != nil {
+			return err
+		}
+		defer req.Body.Close()
+		return json.NewDecoder(req.Body).Decode(target)
+	}
 
 	return json.NewDecoder(r.Body).Decode(target)
 }

@@ -11,6 +11,7 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mr-pmillz/coinmon-go?style=plastic)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mr-pmillz/coinmon-go?style=plastic)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mr-pmillz/coinmon-go?style=plastic)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/12750b2a6fa44b429f8a3f64d3e7f1b6)](https://www.codacy.com/gh/mr-pmillz/coinmon-go/dashboard?utm_source=github.com&utm_medium=referral&utm_content=mr-pmillz/coinmon-go&utm_campaign=Badge_Coverage)
 
 Table of Contents
 =================
