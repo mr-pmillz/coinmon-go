@@ -86,10 +86,7 @@ jobs:
       - name: Run build and MakeFile
         id: binaries
         run: |
-          go env -w GOFLAGS=-mod=mod
-          go mod tidy
-          go build -v .
-          make -f MakeFile all
+          make -f Makefile release
 
       - name: Get current tag name
         run: |
