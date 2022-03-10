@@ -52,6 +52,7 @@ jobs:
       # Run build of the application
       - name: Run build
         run: |
+          go get github.com/mattn/go-isatty@v0.0.12
           make -f Makefile build
 
       # Run Tests and Coverage
