@@ -10,7 +10,7 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mr-pmillz/coinmon-go?style=plastic)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mr-pmillz/coinmon-go?style=plastic)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mr-pmillz/coinmon-go?style=plastic)
-
+[![codecov](https://codecov.io/gh/mr-pmillz/coinmon-go/branch/master/graph/badge.svg?token=1O7CY7MD6U)](https://codecov.io/gh/mr-pmillz/coinmon-go)
 
 Table of Contents
 =================
