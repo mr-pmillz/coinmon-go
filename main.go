@@ -171,9 +171,8 @@ func printTotalMarketCap(coinData *CoinData) error {
 	}
 
 	totalString := strconv.FormatFloat(total, 'E', -1, 64)
-	totalMarketCap, _ := prettyFloatString(totalString, false, true, false)
 	totalMarketCapFull, _ := prettyFloatString(totalString, false, false, false)
-	fmt.Printf("\nTotal Crypto Market Cap \u2248 $%s \u2248 $%s \n", totalMarketCap, totalMarketCapFull)
+	fmt.Printf("\nTotal Crypto Market Cap \u2248 $%s \n", totalMarketCapFull)
 	return nil
 }
 
