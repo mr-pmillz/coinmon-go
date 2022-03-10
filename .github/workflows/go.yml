@@ -27,15 +27,24 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Cache Go modules
-        uses: actions/cache@preview
+      - id: go-cache-paths
+        run: |
+          echo "::set-output name=gobuild::$(go env GOCACHE)"
+          echo "::set-output name=gomod::$(go env GOMODCACHE)"
+
+      # Cache go build cache
+      - name: Go Build Cache
+        uses: actions/cache@v2
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.OS }}-build-${{ env.cache-name }}-
-            ${{ runner.OS }}-build-
-            ${{ runner.OS }}-
+          path: ${{ steps.go-cache-paths.outputs.gobuild }}
+          key: ${{ runner.os }}-gobuild-${{ hashFiles('**/go.sum') }}
+
+      # Cache go mod cache
+      - name: Go Mod Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.go-cache-paths.outputs.gomod }}
+          key: ${{ runner.os }}-gomod-${{ hashFiles('**/go.sum') }}
 
       # Run build of the application
       - name: Run build
@@ -67,15 +76,24 @@ jobs:
         with:
           go-version: 1.17.x
 
-      - name: Cache Go modules
-        uses: actions/cache@preview
+      - id: go-cache-paths
+        run: |
+          echo "::set-output name=gobuild::$(go env GOCACHE)"
+          echo "::set-output name=gomod::$(go env GOMODCACHE)"
+
+      # Cache go build cache
+      - name: Go Build Cache
+        uses: actions/cache@v2
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.OS }}-build-${{ env.cache-name }}-
-            ${{ runner.OS }}-build-
-            ${{ runner.OS }}-
+          path: ${{ steps.go-cache-paths.outputs.gobuild }}
+          key: ${{ runner.os }}-gobuild-${{ hashFiles('**/go.sum') }}
+
+      # Cache go mod cache
+      - name: Go Mod Cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.go-cache-paths.outputs.gomod }}
+          key: ${{ runner.os }}-gomod-${{ hashFiles('**/go.sum') }}
 
       # Install all the dependencies
       - name: Install dependencies
@@ -84,7 +102,7 @@ jobs:
           go get github.com/mattn/go-isatty@v0.0.12
 
       # Run build of the application
-      - name: Run build and MakeFile
+      - name: Run build and Makeile
         id: binaries
         run: |
           make -f Makefile release
