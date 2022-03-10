@@ -3,7 +3,6 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-yellow.svg)](https://www.paypal.com/donate?business=YR6C4WB5CDZZL&no_recurring=0&item_name=contribute+to+open+source&currency_code=USD)
 [![Donate with Bitcoin](https://en.cryptobadges.io/badge/micro/3Cd54T1EB6WHRcechq1dRCGF6vY2HHhkdk)](https://en.cryptobadges.io/donate/3Cd54T1EB6WHRcechq1dRCGF6vY2HHhkdk)
 [![Donate with Ethereum](https://en.cryptobadges.io/badge/micro/0x064AA753EF36e5641E2Ee3C9BbC117F6aFe35F62)](https://en.cryptobadges.io/donate/0x064AA753EF36e5641E2Ee3C9BbC117F6aFe35F62)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/12750b2a6fa44b429f8a3f64d3e7f1b6)](https://www.codacy.com/gh/mr-pmillz/coinmon-go/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mr-pmillz/coinmon-go&amp;utm_campaign=Badge_Grade)
 [![Go Report Card](https://goreportcard.com/badge/github.com/mr-pmillz/coinmon-go)](https://goreportcard.com/report/github.com/mr-pmillz/coinmon-go)
 ![GitHub all releases](https://img.shields.io/github/downloads/mr-pmillz/coinmon-go/total?style=social)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mr-pmillz/coinmon-go/CI?style=plastic)
@@ -11,7 +10,7 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mr-pmillz/coinmon-go?style=plastic)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mr-pmillz/coinmon-go?style=plastic)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mr-pmillz/coinmon-go?style=plastic)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/12750b2a6fa44b429f8a3f64d3e7f1b6)](https://www.codacy.com/gh/mr-pmillz/coinmon-go/dashboard?utm_source=github.com&utm_medium=referral&utm_content=mr-pmillz/coinmon-go&utm_campaign=Badge_Coverage)
+
 
 Table of Contents
 =================

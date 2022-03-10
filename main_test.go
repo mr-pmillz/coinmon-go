@@ -154,4 +154,3 @@ func Test_printTotalMarketCap(t *testing.T) {
 		})
 	}
 }
-

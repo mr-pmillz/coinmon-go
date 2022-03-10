@@ -3,13 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mr-pmillz/coinmon-go/utils"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mr-pmillz/coinmon-go/utils"
 
 	"github.com/mkideal/cli"
 	"github.com/olekukonko/tablewriter"
@@ -178,6 +179,9 @@ func printTotalMarketCap(coinData *CoinData) error {
 
 func main() {
 	os.Exit(cli.Run(new(argT), func(ctx *cli.Context) error {
+		now := time.Now()
+		fmt.Printf("%s\n", now.Format("01-02-2006 15:04 PM Monday"))
+
 		argv := ctx.Argv().(*argT)
 		var url string
 		if len(argv.Find) >= 1 {
