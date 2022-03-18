@@ -176,6 +176,42 @@ func printTotalMarketCap(coinData *CoinData) error {
 	return nil
 }
 
+// printTopMovers prints the largest gaining and losing coin from past 24 hours
+func printTopMovers(data *CoinData) error {
+	var highest float64 = 0
+	var lowest float64 = 0
+	topGainers := &CoinData{}
+	topLosers := &CoinData{}
+
+	for _, row := range data.Data {
+		if row.ChangePercent24Hr != "" {
+			num, err := strconv.ParseFloat(row.ChangePercent24Hr, 64)
+			if err != nil {
+				return err
+			}
+			if num > highest {
+				highest = num
+				topGainers.Data = []Data{row}
+			}
+			if num < lowest {
+				lowest = num
+				topLosers.Data = []Data{row}
+			}
+		}
+	}
+
+	fmt.Println("====================================Top Gainers Past 24 Hours========================================")
+	if err := printTable(topGainers); err != nil {
+		return err
+	}
+	fmt.Println("====================================Top Losers Past 24 Hours=========================================")
+	if err := printTable(topLosers); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func main() {
 	os.Exit(cli.Run(new(argT), func(ctx *cli.Context) error {
 		now := time.Now()
@@ -203,6 +239,9 @@ func main() {
 
 		totalMarketCapCoinData := new(CoinData)
 		if err := getJSON(top2000, totalMarketCapCoinData); err != nil {
+			log.Panic(err)
+		}
+		if err := printTopMovers(totalMarketCapCoinData); err != nil {
 			log.Panic(err)
 		}
 		if err := printTotalMarketCap(totalMarketCapCoinData); err != nil {

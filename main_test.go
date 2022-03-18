@@ -154,3 +154,29 @@ func Test_printTotalMarketCap(t *testing.T) {
 		})
 	}
 }
+
+func Test_printTopMovers(t *testing.T) {
+	type args struct {
+		coinData *CoinData
+	}
+
+	rawReader := strings.NewReader(rawData)
+	coinData := new(CoinData)
+	if err := json.NewDecoder(rawReader).Decode(coinData); err != nil {
+		t.Errorf("couldnt decode data: %v", err)
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "Test_printTopMovers 1", args: args{coinData: coinData}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := printTopMovers(tt.args.coinData); (err != nil) != tt.wantErr {
+				t.Errorf("printTotalMarketCap() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
