@@ -41,6 +41,15 @@ To build from source, clone the repo and run
 go build
 ```
 
+## Coinmon-go now uses the CoinMarketCap API
+
+- [Create a Free API Key](https://coinmarketcap.com/api/documentation/v1/#section/Quick-Start-Guide)
+- add it as an env var (config file support coming soon)
+- `COINMARKETCAP_API_KEY=foo-bar-baz`
+
+Reason for switching is the data is more accurate than the coincap api and cmc api has more rich functionality.
+If you don't add the COINMARKETCAP_API_KEY to your env vars, coin prices wont show.
+
 ## Usage
 
 ```bash
@@ -49,7 +58,6 @@ Options:
 
   -h, --help       display help information
   -t, --top[=10]   Amount of coins to show data for, Default is top 10, If -f|--find flag supplied, -t|--top is ignored
-  -f, --find       Specific Coins to return. Example: bitcoin,cardano,ethereum,uniswap
 ```
 
 - Get Top 20 Coins
@@ -58,14 +66,5 @@ Options:
 ./coinmon-go -t 20
 ```
 
-![top20.png](https://github.com/mr-pmillz/coinmon-go/blob/master/img/top20.png?raw=true)
-
-- Get Specified Coins
-
-```bash
-./coinmon-go --find bitcoin,ethereum,cardano,uniswap,dogecoin,chainlink,monero,filecoin,tron,bittorrent
-```
-
-![find.png](https://github.com/mr-pmillz/coinmon-go/blob/master/img/find.png?raw=true)
 
 - By default, `./coinmon-go` with no arguments will just return the top 10 coins by market cap

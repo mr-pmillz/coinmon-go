@@ -1,6 +1,6 @@
 module github.com/mr-pmillz/coinmon-go
 
-go 1.17
+go 1.18
 
 require (
 	github.com/mkideal/cli v0.2.7
