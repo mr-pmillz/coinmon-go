@@ -15,6 +15,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mkideal/expr v0.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
-	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
+	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd // indirect
 	golang.org/x/term v0.0.0-20201117132131-f5c789dd3221 // indirect
 )
