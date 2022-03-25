@@ -317,7 +317,7 @@ type CMCData struct {
 }
 
 // getCoinMarketCapAPI ...
-func getCoinMarketCapAPI(target interface{}) error {
+func getCoinMarketCapAPI(target interface{}, argv *argT) error {
 	apiKey, _ := os.LookupEnv("COINMARKETCAP_API_KEY")
 	if apiKey != "" {
 		client := &http.Client{}
@@ -329,7 +329,7 @@ func getCoinMarketCapAPI(target interface{}) error {
 
 		q := url.Values{}
 		q.Add("start", "1")
-		q.Add("limit", "5000")
+		q.Add("limit", argv.Top)
 		q.Add("convert", "USD")
 
 		req.Header.Set("Accepts", "application/json")
@@ -367,7 +367,7 @@ func main() {
 		}
 
 		cmcData := new(CMCCoinData)
-		if err := getCoinMarketCapAPI(cmcData); err != nil {
+		if err := getCoinMarketCapAPI(cmcData, argv); err != nil {
 			log.Panic(err)
 		}
 		coinData := new(CoinData)
@@ -385,9 +385,9 @@ func main() {
 		if err := getJSON(top2000, totalMarketCapCoinData); err != nil {
 			log.Panic(err)
 		}
-		if err := printTopMovers(totalMarketCapCoinData, cmcData); err != nil {
-			log.Panic(err)
-		}
+		//if err := printTopMovers(totalMarketCapCoinData, cmcData); err != nil {
+		//	log.Panic(err)
+		//}
 		if err := printTotalMarketCap(totalMarketCapCoinData); err != nil {
 			log.Panic(err)
 		}
