@@ -2,3 +2,4 @@
 coinmon-go
 ./bin
 bin/*
+config/config.yaml

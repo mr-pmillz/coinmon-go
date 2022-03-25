@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -86,12 +87,30 @@ func prettyFloatString(num string, percent, nearestThousandFMT, prec4 bool) (str
 	return p.Sprintf("%.2f", number), nil
 }
 
-func printTable(coinData *CoinData) error {
+// lookup7Day
+func lookup7Day(data *CMCCoinData, coinIndex string) (string, error) {
+	coinID, err := strconv.Atoi(coinIndex)
+	if err != nil {
+		return "", err
+	}
+	for _, row := range data.Data {
+		if coinID == row.CmcRank {
+			p := message.NewPrinter(language.English)
+			percent := p.Sprintf("%.2f", row.Quote.Usd.PercentChange7D)
+			return percent, nil
+		}
+	}
+
+	return "", nil
+}
+
+func printTable(coinData *CoinData, cmcData *CMCCoinData) error {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Rank", "Name", "Symbol", "Price (USD)", "Change 24H", "VWAP 24H", "Market Cap", "Supply", "Volume 24H"})
+	table.SetHeader([]string{"Rank", "Name", "Symbol", "Price (USD)", "Change 24H", "Change 7Day", "VWAP 24H", "Market Cap", "Supply", "Volume 24H"})
 	table.SetBorder(false)
 
 	table.SetHeaderColor(
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
@@ -113,9 +132,16 @@ func printTable(coinData *CoinData) error {
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
 	)
 
 	for _, row := range coinData.Data {
+		vwap7Day, err := lookup7Day(cmcData, row.Rank)
+		if err != nil {
+			return err
+		}
+
+		vwap7DayString, _ := prettyFloatString(vwap7Day, true, false, false)
 		price, _ := prettyFloatString(row.PriceUSD, false, false, true)
 		changePercent24Hr, _ := prettyFloatString(row.ChangePercent24Hr, true, false, false)
 		vwap24Hr, _ := prettyFloatString(row.Vwap24Hr, false, false, false)
@@ -123,15 +149,42 @@ func printTable(coinData *CoinData) error {
 		maxSupply, _ := prettyFloatString(row.MaxSupply, false, true, false)
 		volume24Hr, _ := prettyFloatString(row.VolumeUSD24Hr, false, true, false)
 
-		colorData := []string{row.Rank, row.Name, row.Symbol, "$" + price, changePercent24Hr, "$" + vwap24Hr, "$" + marketCapUSD, maxSupply, volume24Hr}
+		colorData := []string{row.Rank, row.Name, row.Symbol, "$" + price, changePercent24Hr, vwap7DayString, "$" + vwap24Hr, "$" + marketCapUSD, maxSupply, volume24Hr}
 
-		if strings.HasPrefix(row.ChangePercent24Hr, "-") {
+		if strings.HasPrefix(row.ChangePercent24Hr, "-") && strings.HasPrefix(vwap7DayString, "-") {
 			table.Rich(colorData, []tablewriter.Colors{
 				{},
 				{tablewriter.FgHiRedColor},
 				{},
 				{tablewriter.Normal},
 				{tablewriter.Bold, tablewriter.FgHiRedColor},
+				{tablewriter.Bold, tablewriter.FgHiRedColor},
+				{tablewriter.Normal},
+				{tablewriter.Normal},
+				{tablewriter.Normal},
+				{tablewriter.Normal},
+			})
+		} else if strings.HasPrefix(row.ChangePercent24Hr, "-") && !strings.HasPrefix(vwap7DayString, "-") {
+			table.Rich(colorData, []tablewriter.Colors{
+				{},
+				{tablewriter.FgHiRedColor},
+				{},
+				{tablewriter.Normal},
+				{tablewriter.Normal, tablewriter.FgHiRedColor},
+				{tablewriter.Normal, tablewriter.FgHiGreenColor},
+				{tablewriter.Normal},
+				{tablewriter.Normal},
+				{tablewriter.Normal},
+				{tablewriter.Normal},
+			})
+		} else if !strings.HasPrefix(row.ChangePercent24Hr, "-") && strings.HasPrefix(vwap7DayString, "-") {
+			table.Rich(colorData, []tablewriter.Colors{
+				{},
+				{tablewriter.Normal, tablewriter.FgHiGreenColor},
+				{},
+				{tablewriter.Normal},
+				{tablewriter.Normal, tablewriter.FgHiGreenColor},
+				{tablewriter.Normal, tablewriter.FgHiRedColor},
 				{tablewriter.Normal},
 				{tablewriter.Normal},
 				{tablewriter.Normal},
@@ -140,9 +193,10 @@ func printTable(coinData *CoinData) error {
 		} else {
 			table.Rich(colorData, []tablewriter.Colors{
 				{},
-				{},
+				{tablewriter.FgHiGreenColor},
 				{},
 				{tablewriter.Normal},
+				{tablewriter.Normal, tablewriter.FgHiGreenColor},
 				{tablewriter.Normal, tablewriter.FgHiGreenColor},
 				{tablewriter.Normal},
 				{tablewriter.Normal},
@@ -177,7 +231,7 @@ func printTotalMarketCap(coinData *CoinData) error {
 }
 
 // printTopMovers prints the largest gaining and losing coin from past 24 hours
-func printTopMovers(data *CoinData) error {
+func printTopMovers(data *CoinData, cmcData *CMCCoinData) error {
 	var highest float64 = 0
 	var lowest float64 = 0
 	topGainers := &CoinData{}
@@ -201,12 +255,98 @@ func printTopMovers(data *CoinData) error {
 	}
 
 	fmt.Println("====================================Top Gainers Past 24 Hours========================================")
-	if err := printTable(topGainers); err != nil {
+	if err := printTable(topGainers, cmcData); err != nil {
 		return err
 	}
 	fmt.Println("====================================Top Losers Past 24 Hours=========================================")
-	if err := printTable(topLosers); err != nil {
+	if err := printTable(topLosers, cmcData); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+type CMCCoinData struct {
+	Status Status    `json:"status"`
+	Data   []CMCData `json:"data"`
+}
+type Status struct {
+	Timestamp    time.Time   `json:"timestamp"`
+	ErrorCode    int         `json:"error_code"`
+	ErrorMessage interface{} `json:"error_message"`
+	Elapsed      int         `json:"elapsed"`
+	CreditCount  int         `json:"credit_count"`
+	Notice       interface{} `json:"notice"`
+	TotalCount   int         `json:"total_count"`
+}
+type Usd struct {
+	Price                 float64   `json:"price"`
+	Volume24H             float64   `json:"volume_24h"`
+	VolumeChange24H       float64   `json:"volume_change_24h"`
+	PercentChange1H       float64   `json:"percent_change_1h"`
+	PercentChange24H      float64   `json:"percent_change_24h"`
+	PercentChange7D       float64   `json:"percent_change_7d"`
+	PercentChange30D      float64   `json:"percent_change_30d"`
+	PercentChange60D      float64   `json:"percent_change_60d"`
+	PercentChange90D      float64   `json:"percent_change_90d"`
+	MarketCap             float64   `json:"market_cap"`
+	MarketCapDominance    float64   `json:"market_cap_dominance"`
+	FullyDilutedMarketCap float64   `json:"fully_diluted_market_cap"`
+	LastUpdated           time.Time `json:"last_updated"`
+}
+type Quote struct {
+	Usd Usd `json:"USD"`
+}
+type CMCData struct {
+	ID                            int         `json:"id"`
+	Name                          string      `json:"name"`
+	Symbol                        string      `json:"symbol"`
+	Slug                          string      `json:"slug"`
+	NumMarketPairs                int         `json:"num_market_pairs"`
+	DateAdded                     time.Time   `json:"date_added"`
+	Tags                          []string    `json:"tags"`
+	MaxSupply                     float64     `json:"max_supply"`
+	CirculatingSupply             float64     `json:"circulating_supply"`
+	TotalSupply                   float64     `json:"total_supply"`
+	Platform                      interface{} `json:"platform"`
+	CmcRank                       int         `json:"cmc_rank"`
+	SelfReportedCirculatingSupply interface{} `json:"self_reported_circulating_supply"`
+	SelfReportedMarketCap         interface{} `json:"self_reported_market_cap"`
+	LastUpdated                   time.Time   `json:"last_updated"`
+	Quote                         Quote       `json:"quote"`
+}
+
+// getCoinMarketCapAPI ...
+func getCoinMarketCapAPI(target interface{}) error {
+	apiKey, _ := os.LookupEnv("COINMARKETCAP_API_KEY")
+	if apiKey != "" {
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", nil)
+		if err != nil {
+			log.Print(err)
+			os.Exit(1)
+		}
+
+		q := url.Values{}
+		q.Add("start", "1")
+		q.Add("limit", "5000")
+		q.Add("convert", "USD")
+
+		req.Header.Set("Accepts", "application/json")
+		req.Header.Add("X-CMC_PRO_API_KEY", apiKey)
+		req.URL.RawQuery = q.Encode()
+
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Println("Error sending request to server")
+			os.Exit(1)
+		}
+		defer resp.Body.Close()
+
+		return json.NewDecoder(resp.Body).Decode(target)
+		//fmt.Println(resp.Status)
+		//respBody, _ := ioutil.ReadAll(resp.Body)
+		//fmt.Println(string(respBody))
 	}
 
 	return nil
@@ -218,19 +358,23 @@ func main() {
 		fmt.Printf("%s\n", now.Format("01-02-2006 15:04 PM Monday"))
 
 		argv := ctx.Argv().(*argT)
-		var url string
+		var defaultURL string
 		if len(argv.Find) >= 1 {
 			coins := strings.Join(argv.Find, ",")
-			url = fmt.Sprintf("https://api.coincap.io/v2/assets?ids=%s", coins)
+			defaultURL = fmt.Sprintf("https://api.coincap.io/v2/assets?ids=%s", coins)
 		} else {
-			url = fmt.Sprintf("https://api.coincap.io/v2/assets?limit=%s", argv.Top)
+			defaultURL = fmt.Sprintf("https://api.coincap.io/v2/assets?limit=%s", argv.Top)
 		}
 
-		coinData := new(CoinData)
-		if err := getJSON(url, coinData); err != nil {
+		cmcData := new(CMCCoinData)
+		if err := getCoinMarketCapAPI(cmcData); err != nil {
 			log.Panic(err)
 		}
-		if err := printTable(coinData); err != nil {
+		coinData := new(CoinData)
+		if err := getJSON(defaultURL, coinData); err != nil {
+			log.Panic(err)
+		}
+		if err := printTable(coinData, cmcData); err != nil {
 			log.Panic(err)
 		}
 
@@ -241,7 +385,7 @@ func main() {
 		if err := getJSON(top2000, totalMarketCapCoinData); err != nil {
 			log.Panic(err)
 		}
-		if err := printTopMovers(totalMarketCapCoinData); err != nil {
+		if err := printTopMovers(totalMarketCapCoinData, cmcData); err != nil {
 			log.Panic(err)
 		}
 		if err := printTotalMarketCap(totalMarketCapCoinData); err != nil {
