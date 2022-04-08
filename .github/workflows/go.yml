@@ -92,7 +92,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
-          distribution: coinmon-go
+          distribution: goreleaser
           version: latest
           args: release --rm-dist
         env:
