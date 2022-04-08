@@ -1,6 +1,7 @@
 before:
   hooks:
     # You may remove this if you don't use go modules.
+    - make -f Makefile clean
     - go mod tidy
 builds:
   - id: coinmon-go

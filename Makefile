@@ -1,4 +1,5 @@
 BIN="./bin"
+DIST="./dist"
 SRC=$(shell find . -name "*.go")
 CURRENT_TAG=$(shell git describe --tags --abbrev=0)
 
@@ -56,6 +57,7 @@ test:
 
 clean:
 	rm -rf $(BIN) 2>/dev/null
+	rm -rf $(DIST) 2>/dev/null
 
 build:
 	go env -w GOFLAGS=-mod=mod
