@@ -60,21 +60,21 @@ clean:
 build:
 	go env -w GOFLAGS=-mod=mod
 	go mod tidy
-	go build -v .
+	go build -v -trimpath -ldflags="-s -w" .
 
 compile:
-	GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/coinmon-go-$(CURRENT_TAG)-linux-amd64 main.go
-	GOOS=linux GOARCH=arm64 go build -o bin/linux/arm64/coinmon-go-$(CURRENT_TAG)-linux-arm64 main.go
-	GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/coinmon-go-$(CURRENT_TAG)-x86_64-apple-darwin_amd64 main.go
-	GOOS=darwin GOARCH=arm64 go build -o bin/darwin/arm64/coinmon-go-$(CURRENT_TAG)-x86_64-apple-darwin_arm64 main.go
-	GOOS=windows GOARCH=amd64 go build -o bin/windows/amd64/coinmon-go-$(CURRENT_TAG)-x86_64-windows_amd64 main.go
-	GOOS=windows GOARCH=386 go build -o bin/windows/386/coinmon-go-$(CURRENT_TAG)-386-windows main.go
+	GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/coinmon-go-$(CURRENT_TAG)-linux-amd64 -trimpath -ldflags="-s -w" -gcflags="all=-trimpath=${GOPATH}" -asmflags="all=-trimpath=${GOPATH}" main.go
+	GOOS=linux GOARCH=arm64 go build -o bin/linux/arm64/coinmon-go-$(CURRENT_TAG)-linux-arm64 -trimpath -ldflags="-s -w" -gcflags="all=-trimpath=${GOPATH}" -asmflags="all=-trimpath=${GOPATH}" main.go
+	GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/coinmon-go-$(CURRENT_TAG)-x86_64-apple-darwin_amd64 -trimpath -ldflags="-s -w" -gcflags="all=-trimpath=${GOPATH}" -asmflags="all=-trimpath=${GOPATH}" main.go
+	GOOS=darwin GOARCH=arm64 go build -o bin/darwin/arm64/coinmon-go-$(CURRENT_TAG)-x86_64-apple-darwin_arm64 -trimpath -ldflags="-s -w" -gcflags="all=-trimpath=${GOPATH}" -asmflags="all=-trimpath=${GOPATH}" main.go
+	GOOS=windows GOARCH=amd64 go build -o bin/windows/amd64/coinmon-go-$(CURRENT_TAG)-x86_64-windows_amd64.exe -trimpath -ldflags="-s -w" -gcflags="all=-trimpath=${GOPATH}" -asmflags="all=-trimpath=${GOPATH}" main.go
+	GOOS=windows GOARCH=386 go build -o bin/windows/386/coinmon-go-$(CURRENT_TAG)-386-windows.exe -trimpath -ldflags="-s -w" -gcflags="all=-trimpath=${GOPATH}" -asmflags="all=-trimpath=${GOPATH}" main.go
 
 compress:
 	gzip -9 bin/linux/amd64/coinmon-go-$(CURRENT_TAG)-linux-amd64
 	gzip -9 bin/linux/arm64/coinmon-go-$(CURRENT_TAG)-linux-arm64
 	gzip -9 bin/darwin/amd64/coinmon-go-$(CURRENT_TAG)-x86_64-apple-darwin_amd64
 	gzip -9 bin/darwin/arm64/coinmon-go-$(CURRENT_TAG)-x86_64-apple-darwin_arm64
-	gzip -9 bin/windows/386/coinmon-go-$(CURRENT_TAG)-386-windows
-	gzip -9 bin/windows/amd64/coinmon-go-$(CURRENT_TAG)-x86_64-windows_amd64
+	gzip -9 bin/windows/386/coinmon-go-$(CURRENT_TAG)-386-windows.exe
+	gzip -9 bin/windows/amd64/coinmon-go-$(CURRENT_TAG)-x86_64-windows_amd64.exe
 

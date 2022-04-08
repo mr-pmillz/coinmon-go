@@ -54,7 +54,9 @@ jobs:
 
       # Run main.go
       - name: Run main
-        run: go run ./main.go
+        env:
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }}
+        run: go run ./main.go -t 10
   # ================
   # RELEASE JOB
   #   runs after a successful build
@@ -76,65 +78,28 @@ jobs:
         with:
           go-version: 1.18.x
 
-      - id: go-cache-paths
-        run: |
-          echo "::set-output name=gobuild::$(go env GOCACHE)"
-          echo "::set-output name=gomod::$(go env GOMODCACHE)"
-
-      # Cache go build cache
-      - name: Go Build Cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.go-cache-paths.outputs.gobuild }}
-          key: ${{ runner.os }}-gobuild-${{ hashFiles('**/go.sum') }}
-
       # Cache go mod cache
       - name: Go Mod Cache
         uses: actions/cache@v2
         with:
-          path: ${{ steps.go-cache-paths.outputs.gomod }}
-          key: ${{ runner.os }}-gomod-${{ hashFiles('**/go.sum') }}
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-      # Install all the dependencies
-      - name: Install dependencies
-        run: |
-          go version
-          go get github.com/mattn/go-isatty@v0.0.12
-
-      # Run build of the application
-      - name: Run build and Makeile
-        id: binaries
-        run: |
-          make -f Makefile release
-
-      - name: Get current tag name
-        run: |
-          echo "TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
-          echo "PREVIOUS_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_ENV
-      - name: "Build Changelog"
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@v1
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
         with:
-          configuration: ".github/configuration_repo.json"
-          owner: "mr-pmillz"
-          repo: "coinmon-go"
-          fromTag: ${{ env.PREVIOUS_TAG }}
-          toTag: ${{ env.TAG }}
+          distribution: coinmon-go
+          version: latest
+          args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Release
-        if: success()
-        uses: softprops/action-gh-release@v1
+      - name: Upload assets
+        uses: actions/upload-artifact@v2
         with:
-          body: ${{steps.github_release.outputs.changelog}}
-          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-b') || contains(github.ref, '-a') }}
-          files: |
-            bin/linux/amd64/coinmon-go-${{ env.TAG }}-linux-amd64.gz
-            bin/linux/arm64/coinmon-go-${{ env.TAG }}-linux-arm64.gz
-            bin/darwin/amd64/coinmon-go-${{ env.TAG }}-x86_64-apple-darwin_amd64.gz
-            bin/darwin/arm64/coinmon-go-${{ env.TAG }}-x86_64-apple-darwin_arm64.gz
-            bin/windows/amd64/coinmon-go-${{ env.TAG }}-x86_64-windows_amd64.gz
-            bin/windows/386/coinmon-go-${{ env.TAG }}-386-windows.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: coinmon-go
+          path: dist/*
