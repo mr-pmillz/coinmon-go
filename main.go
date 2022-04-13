@@ -94,10 +94,11 @@ func redOrGreen(num float64) tablewriter.Colors {
 
 func printTable(cmcData *CMCCoinData) error {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Rank", "Name", "Symbol", "Price (USD)", "Change 24H", "Change 7Day", "Change 30Day", "Market Cap", "Supply", "Volume 24H"})
+	table.SetHeader([]string{"Rank", "Name", "Symbol", "Price (USD)", "Change 24H", "Change 7Day", "Change 30Day", "Market Cap", "Supply", "Circulating Supply", "Volume 24H"})
 	table.SetBorder(false)
 
 	table.SetHeaderColor(
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiYellowColor, tablewriter.BgBlackColor},
@@ -121,6 +122,7 @@ func printTable(cmcData *CMCCoinData) error {
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
 		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgHiWhiteColor, tablewriter.BgBlackColor},
 	)
 
 	for _, row := range cmcData.Data {
@@ -130,10 +132,11 @@ func printTable(cmcData *CMCCoinData) error {
 		changePercent30Day, _ := formatFloat(row.Quote.Usd.PercentChange30D, true, false, false)
 		marketCapUSD, _ := formatFloat(row.Quote.Usd.MarketCap, false, true, false)
 		maxSupply, _ := formatFloat(row.MaxSupply, false, true, false)
+		circulatingSupply, _ := formatFloat(row.CirculatingSupply, false, true, true)
 		volume24Hr, _ := formatFloat(row.Quote.Usd.Volume24H, false, true, false)
 		rank := strconv.FormatInt(int64(row.CmcRank), 10)
 
-		colorData := []string{rank, row.Name, row.Symbol, "$" + price, changePercent24Hr, vwap7DayString, changePercent30Day, "$" + marketCapUSD, maxSupply, volume24Hr}
+		colorData := []string{rank, row.Name, row.Symbol, "$" + price, changePercent24Hr, vwap7DayString, changePercent30Day, "$" + marketCapUSD, maxSupply, circulatingSupply, volume24Hr}
 
 		table.Rich(colorData, []tablewriter.Colors{
 			{},
@@ -143,6 +146,7 @@ func printTable(cmcData *CMCCoinData) error {
 			redOrGreen(row.Quote.Usd.PercentChange24H),
 			redOrGreen(row.Quote.Usd.PercentChange7D),
 			redOrGreen(row.Quote.Usd.PercentChange30D),
+			{tablewriter.Normal},
 			{tablewriter.Normal},
 			{tablewriter.Normal},
 			{tablewriter.Normal},
@@ -161,21 +165,21 @@ func printTotalMarketCap(coinData *GlobalMetrics) error {
 	return nil
 }
 
-// getCoinMarketCapAPI ...
-func getCoinMarketCapAPI(target interface{}, argv *argT) error {
+// makeCoinMarketCapRequest ...
+func makeCoinMarketCapRequest(uri, httpMethod string, target interface{}, params map[string]string) error {
 	apiKey, _ := os.LookupEnv("COINMARKETCAP_API_KEY")
 	if apiKey != "" {
 		client := &http.Client{}
-		req, err := http.NewRequest("GET", "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", nil)
+		req, err := http.NewRequest(httpMethod, fmt.Sprintf("https://pro-api.coinmarketcap.com/v1/%s", uri), nil)
 		if err != nil {
 			log.Print(err)
 			os.Exit(1)
 		}
 
 		q := url.Values{}
-		q.Add("start", "1")
-		q.Add("limit", argv.Top)
-		q.Add("convert", "USD")
+		for k, v := range params {
+			q.Add(k, v)
+		}
 
 		req.Header.Set("Accepts", "application/json")
 		req.Header.Add("X-CMC_PRO_API_KEY", apiKey)
@@ -213,49 +217,35 @@ type GlobalMetrics struct {
 	} `json:"data"`
 }
 
-// getTotalMarketCap ...
-func getTotalMarketCap(target interface{}) error {
-	apiKey, _ := os.LookupEnv("COINMARKETCAP_API_KEY")
-	if apiKey != "" {
-		client := &http.Client{}
-		req, err := http.NewRequest("GET", "https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest", nil)
-		if err != nil {
-			log.Print(err)
-			os.Exit(1)
-		}
-
-		req.Header.Set("Accepts", "application/json")
-		req.Header.Add("X-CMC_PRO_API_KEY", apiKey)
-
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Println("Error sending request to server")
-			os.Exit(1)
-		}
-		defer resp.Body.Close()
-
-		return json.NewDecoder(resp.Body).Decode(target)
-	}
-
-	return nil
-}
-
 func main() {
 	os.Exit(cli.Run(new(argT), func(ctx *cli.Context) error {
 		now := time.Now()
 		fmt.Printf("%s\n", now.Format("01-02-2006 15:04 PM Monday"))
 
 		argv := ctx.Argv().(*argT)
+		var top string
+		if argv.Top != "" {
+			top = argv.Top
+		} else {
+			top = "10"
+		}
+
 		cmcData := new(CMCCoinData)
-		if err := getCoinMarketCapAPI(cmcData, argv); err != nil {
+		listingParams := map[string]string{
+			"start":   "1",
+			"limit":   top,
+			"convert": "USD",
+		}
+		if err := makeCoinMarketCapRequest("cryptocurrency/listings/latest", "GET", cmcData, listingParams); err != nil {
 			log.Panic(err)
 		}
+
 		if err := printTable(cmcData); err != nil {
 			log.Panic(err)
 		}
 
 		totalMarketCapCoinData := new(GlobalMetrics)
-		if err := getTotalMarketCap(totalMarketCapCoinData); err != nil {
+		if err := makeCoinMarketCapRequest("global-metrics/quotes/latest", "GET", totalMarketCapCoinData, nil); err != nil {
 			log.Panic(err)
 		}
 

@@ -156,56 +156,46 @@ func Test_printTotalMarketCap(t *testing.T) {
 	}
 }
 
-func Test_getCoinMarketCapAPI(t *testing.T) {
+func Test_makeCoinMarketCapRequest(t *testing.T) {
 	cli.Run(new(argT), func(ctx *cli.Context) error {
 		type args struct {
-			target interface{}
-			argv   *argT
+			uri        string
+			httpMethod string
+			target     interface{}
+			params     map[string]string
 		}
 		argv := ctx.Argv().(*argT)
 		cmcData := new(CMCCoinData)
+		coinData := new(GlobalMetrics)
 		tests := []struct {
 			name    string
 			args    args
 			wantErr bool
 		}{
-			{name: "getCoinMarketCapAPI", args: args{
-				target: cmcData,
-				argv:   argv,
-			}},
+			{name: "Test makeCoinMarketCapRequest Top Ten Coins", args: args{
+				uri:        "cryptocurrency/listings/latest",
+				httpMethod: "GET",
+				target:     cmcData,
+				params: map[string]string{
+					"start":   "1",
+					"limit":   argv.Top,
+					"convert": "USD",
+				},
+			}, wantErr: false},
+			{name: "Test makeCoinMarketCapRequest Total Market Cap", args: args{
+				uri:        "global-metrics/quotes/latest",
+				httpMethod: "GET",
+				target:     coinData,
+				params:     nil,
+			}, wantErr: false},
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
-				if err := getCoinMarketCapAPI(tt.args.target, tt.args.argv); (err != nil) != tt.wantErr {
-					t.Errorf("getCoinMarketCapAPI() error = %v, wantErr %v", err, tt.wantErr)
+				if err := makeCoinMarketCapRequest(tt.args.uri, tt.args.httpMethod, tt.args.target, tt.args.params); (err != nil) != tt.wantErr {
+					t.Errorf("makeCoinMarketCapRequest() error = %v, wantErr %v", err, tt.wantErr)
 				}
 			})
 		}
 		return nil
 	})
-}
-
-func Test_getTotalMarketCap(t *testing.T) {
-	type args struct {
-		target interface{}
-	}
-	rawReader := strings.NewReader(totalMarketCapJSON)
-	coinData := new(GlobalMetrics)
-	if err := json.NewDecoder(rawReader).Decode(coinData); err != nil {
-		t.Errorf("couldnt decode data: %v", err)
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{name: "getTotalMarketCap", args: args{target: coinData}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := getTotalMarketCap(tt.args.target); (err != nil) != tt.wantErr {
-				t.Errorf("getTotalMarketCap() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
 }
